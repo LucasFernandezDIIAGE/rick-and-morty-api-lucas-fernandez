@@ -1,8 +1,10 @@
 package org.mathieu.data.remote.responses
 
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
+import org.mathieu.domain.models.locationPreview.LocationPreview
 
-/**
+@InternalSerializationApi /**
  * Represents detailed information about a character, typically received from an API response.
  *
  * @property id The unique identifier for the character.
@@ -28,12 +30,13 @@ internal data class CharacterResponse(
     val gender: String,
     val origin: CharacterLocationResponse,
     val location: CharacterLocationResponse,
+    val locationPreview: LocationPreviewResponse,
     val image: String,
     val episode: List<String>,
     val url: String,
     val created: String,
 )
 
-@Serializable
+@InternalSerializationApi @Serializable
 internal data class CharacterLocationResponse(val name: String, val url: String)
 

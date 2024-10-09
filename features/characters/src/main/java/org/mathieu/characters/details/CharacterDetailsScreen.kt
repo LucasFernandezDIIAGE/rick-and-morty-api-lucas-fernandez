@@ -5,23 +5,13 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -33,17 +23,31 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import org.mathieu.characters.list.CharactersAction
+import org.mathieu.characters.list.UIAction
+import org.mathieu.ui.Destination
+
+// If you have a custom theme, this can be adjusted to match your colors
+import org.mathieu.ui.theme.Purple40
 import org.mathieu.ui.composables.PreviewContent
+import org.mathieu.ui.navigate
+
 
 private typealias UIState = CharacterDetailsState
+private typealias UIAction = CharacterDetailsAction
+
 
 @Composable
 fun CharacterDetailsScreen(
@@ -57,8 +61,17 @@ fun CharacterDetailsScreen(
 
     CharacterDetailsContent(
         state = state,
-        onClickBack = navController::popBackStack
+        onClickBack = navController::popBackStack,
+        onAction = viewModel::handleAction
+
     )
+    LaunchedEffect(viewModel) {
+        viewModel.events
+            .onEach { event ->
+                if (event is Destination.CharacterDetails)
+                    navController.navigate(destination = event)
+            }.collect()
+    }
 
 }
 
@@ -67,7 +80,9 @@ fun CharacterDetailsScreen(
 @Composable
 private fun CharacterDetailsContent(
     state: UIState = UIState(),
+    onAction: (UIAction) -> Unit = { },
     onClickBack: () -> Unit = { }
+
 ) = Scaffold(topBar = {
 
     Row(
@@ -110,35 +125,6 @@ private fun CharacterDetailsContent(
                 )
             } ?: Box(modifier = Modifier.fillMaxSize()) {
 
-                Box(Modifier.align(Alignment.TopCenter)) {
-
-                    SubcomposeAsyncImage(
-                        modifier = Modifier
-                            .blur(100.dp)
-                            .alpha(0.3f)
-                            .fillMaxWidth(),
-                        model = state.avatarUrl,
-                        contentDescription = null
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .background(
-                                Brush.verticalGradient(
-                                    listOf(
-                                        Color.Transparent,
-                                        MaterialTheme.colorScheme.background
-                                    )
-                                )
-                            )
-                    )
-
-
-                }
-
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -155,13 +141,37 @@ private fun CharacterDetailsContent(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(text = state.name)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Card(modifier = Modifier
+                        .padding(16.dp)
+                        .clickable {
+                            vibratePhone(context = LocalContext.current, 1000)
+                            state.locationPreview?.let { location ->
+                                onAction(CharacterDetailsAction.SelectedLocationCard(location))
+                            }
+                        }
+                        .fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Location: ${state.locationPreview?.name}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Purple40
+                            )
+                            Text(
+                                text = "Type: ${state.locationPreview?.type}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Purple40
+                            )
+                        }
+                    }
                 }
-
-
             }
         }
     }
 }
+
 
 
 @Preview

@@ -2,6 +2,7 @@ package org.mathieu.domain.repositories
 
 import kotlinx.coroutines.flow.Flow
 import org.mathieu.domain.models.character.Character
+import org.mathieu.domain.models.locationPreview.LocationPreview
 
 interface CharacterRepository {
     /**
@@ -25,4 +26,6 @@ interface CharacterRepository {
      * @return Details of the specified character.
      */
     suspend fun getCharacter(id: Int): Character
+
+    suspend fun getLocationPreview(id: Int): LocationPreview
 }

@@ -2,9 +2,11 @@ package org.mathieu.data.local.objects
 
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
+import kotlinx.serialization.InternalSerializationApi
 import org.mathieu.data.remote.responses.CharacterResponse
 import org.mathieu.data.repositories.tryOrNull
 import org.mathieu.domain.models.character.*
+import org.mathieu.domain.models.locationPreview.LocationPreview
 
 /**
  * Represents a character entity stored in the SQLite database. This object provides fields
@@ -36,11 +38,16 @@ internal class CharacterObject: RealmObject {
     var originId: Int = -1
     var locationName: String = ""
     var locationId: Int = -1
+    var locationPreviewId: Int = -1
+    var locationPreviewName: String = ""
+    var locationPreviewType: String = ""
+    var locationPreviewDimension: String = ""
     var image: String = ""
     var created: String = ""
 }
 
 
+@OptIn(InternalSerializationApi::class)
 internal fun CharacterResponse.toRealmObject() = CharacterObject().also { obj ->
     obj.id = id
     obj.name = name
@@ -52,6 +59,10 @@ internal fun CharacterResponse.toRealmObject() = CharacterObject().also { obj ->
     obj.originId = tryOrNull { origin.url.split("/").last().toInt() } ?: -1
     obj.locationName = location.name
     obj.locationId = tryOrNull { location.url.split("/").last().toInt() } ?: -1
+    obj.locationPreviewId = locationPreview.id
+    obj.locationPreviewName = locationPreview.name
+    obj.locationPreviewType = locationPreview.type
+    obj.locationPreviewDimension = locationPreview.dimension
     obj.image = image
     obj.created = created
 }
@@ -65,5 +76,11 @@ internal fun CharacterObject.toModel() = Character(
     gender = tryOrNull { CharacterGender.valueOf(gender) } ?: CharacterGender.Unknown,
     origin = originName to originId,
     location = locationName to locationId,
-    avatarUrl = image
+    avatarUrl = image,
+    locationPreview = LocationPreview(
+        id = locationPreviewId,
+        name = locationPreviewName,
+        type = locationPreviewType,
+        dimension = locationPreviewDimension
+    )
 )

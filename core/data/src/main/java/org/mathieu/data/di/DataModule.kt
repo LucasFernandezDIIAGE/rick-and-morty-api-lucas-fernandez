@@ -22,8 +22,13 @@ val dataModule = module {
 
     single { org.mathieu.data.remote.CharacterApi(get()) }
 
+    single { org.mathieu.data.local.LocationPreviewLocal(get()) }
+
+    single { org.mathieu.data.remote.LocationPreviewAPI(get()) }
+
     single<CharacterRepository> {
         CharacterRepositoryImpl(
+            get(),
             get(),
             get(),
             get()
