@@ -1,5 +1,6 @@
 package org.mathieu.domain.models.character
 
+import org.mathieu.domain.models.location.Location
 import org.mathieu.domain.models.locationPreview.LocationPreview
 
 /**
@@ -24,7 +25,7 @@ data class Character(
     val gender: CharacterGender,
     val origin: Pair<String, Int>,
     val location: Pair<String, Int>,
-    val locationPreview: List<LocationPreview>,
+    val locationPreview: LocationPreview,
     val avatarUrl: String
 )
 
